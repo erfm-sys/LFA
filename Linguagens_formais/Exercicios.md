@@ -1866,7 +1866,7 @@ Antes de avançar para a próxima aula, verifique se você consegue explicar:
 
 
 
-* [ ] O que é um **alfabeto `Σ`**;
+* [x] O que é um **alfabeto `Σ`**;
 
 * [ ] O que é uma **cadeia**;
 
