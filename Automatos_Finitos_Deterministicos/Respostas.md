@@ -8,7 +8,7 @@
 | Turma | N1 |
 | Data | 08/09/2026 |
 | Integrante 1 |João Pedro Figueiredo Ajouz|
-| Integrante 2 |Luiz |
+| Integrante 2 |Luis Fernando Vieira Borges |
 | Integrante 3 | João Victor Santos de Oliveira Vieira |
 | Integrante 4 |Enzo |
 
