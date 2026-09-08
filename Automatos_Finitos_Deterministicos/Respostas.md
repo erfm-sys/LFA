@@ -1,6 +1,18 @@
 # Autômatos Finitos Determinísticos (AFD)
 
 ---
+## Identificação do grupo
+
+| Campo | Preenchimento |
+|---|---|
+| Turma | N1 |
+| Data | 08/09/2026 |
+| Integrante 1 |João Pedro Figueiredo Ajouz|
+| Integrante 2 |Luiz |
+| Integrante 3 | João Victor |
+| Integrante 4 |Enzo |
+
+---
 
 ## Questão 1
 * **Estados:** Existem dois estados, sendo eles `Ligado` e `Desligado`.
