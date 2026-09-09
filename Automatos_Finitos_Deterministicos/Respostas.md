@@ -149,3 +149,115 @@
 * **Definição formal:** $M = (\{\text{Verde}, \text{Amarelo}, \text{Vermelho}\}, \{\text{tempo}\}, \delta, \text{Verde}, \emptyset)$
 * **Entrada:** `tempo`
 * **Explicação:** O sistema muda linearmente com a entrada `tempo`. Não há propriamente uma "aceitação" (estado final, $F = \emptyset$), pois trata-se de um laço infinito de controle reativo.
+---
+
+# Desafio Final — AFD Máquina de Vendas
+
+## Linguagens Formais e Autômatos
+
+### Exercício 13 — Autômato Finito Determinístico
+
+---
+
+## 1. Descrição do Problema
+
+O objetivo deste exercício é modelar, utilizando um **Autômato Finito Determinístico (AFD)**, o funcionamento de uma máquina automática de vendas de bebidas.
+
+A máquina comercializa latas de refrigerante pelo valor fixo de **R$ 2,00**.
+
+### Regras de funcionamento
+
+- A máquina aceita moedas de **R$ 1,00** e **R$ 2,00**.
+- O botão `c` representa **Cancelar/Devolver**.
+- Ao pressionar `c`, a transação é cancelada e o dinheiro inserido é devolvido.
+- O produto é liberado quando o saldo acumulado atinge ou ultrapassa **R$ 2,00**.
+- Caso o usuário tenha inserido R$ 1,00 e posteriormente insira uma moeda de R$ 2,00, o produto é liberado com **R$ 1,00 de troco**.
+- Após o produto ser liberado, uma nova moeda inicia uma nova compra.
+
+---
+
+## 2. Alfabeto e Estados
+
+### Alfabeto
+
+O alfabeto do autômato é:
+
+$$
+\Sigma = \{1,2,c\}
+$$
+
+| Símbolo | Significado |
+|---|---|
+| `1` | Moeda de R$ 1,00 |
+| `2` | Moeda de R$ 2,00 |
+| `c` | Cancelar/Devolver |
+
+### Estados
+
+O conjunto de estados é:
+
+$$
+Q = \{q_0,q_1,q_2\}
+$$
+
+| Estado | Significado |
+|---|---|
+| `q0` | Saldo de R$ 0,00 |
+| `q1` | Saldo de R$ 1,00 |
+| `q2` | Saldo de R$ 2,00 ou mais — produto liberado |
+
+### Estado inicial
+
+$$
+q_0
+$$
+
+### Estado final
+
+$$
+F = \{q_2\}
+$$
+
+---
+
+## 3. Tabela de Transições
+
+| Estado atual | Entrada `1` | Entrada `2` | Entrada `c` |
+|---|---|---|---|
+| **→ q0** | q1 | q2 | q0 |
+| **q1** | q2 | q2 | q0 |
+| **\* q2** | q1 | q2 | q0 |
+
+**Legenda:**
+
+- `→` indica o estado inicial.
+- `*` indica o estado final de aceitação.
+
+---
+
+## 4. Diagrama do AFD
+
+O diagrama do autômato deve ser criado utilizando a biblioteca **jflap-lib**.
+
+![Diagrama do AFD](docs/afd-maquina-vendas.png)
+
+### Estrutura do autômato
+
+```text
+                    2
+              ┌───────────┐
+              │           ▼
+           ┌──────┐    ┌──────┐
+        ──►│  q0  │    │ q2*  │
+           └──────┘    └──────┘
+             │  │        │  │
+            1│  │2      1│  │2
+             ▼  └────────┘  │
+           ┌──────┐          │
+           │  q1  │──────────┘
+           └──────┘
+             │  │
+            1│  │2
+             └──┴──────► q2
+
+             c: retorno ao estado q0
