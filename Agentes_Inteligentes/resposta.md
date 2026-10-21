@@ -4,7 +4,7 @@ Aula 20/10/2026 | Professora Kadidja Valéria | Inteligência artificial
 
 **Disciplina:** Linguagens Formais e Autômatos | ciência da Computação
 
-**Estudante:** [João Pedro Figueiredo Ajouz] | **Turma:** [N1]
+**Estudante:** [] | **Turma:** [N1]
 
 Realize os exercícios 2.3, 2.4 e 2.5 do Capítulo 2 sobre agentes inteligentes. Analise a racionalidade, descreva ambientes de tarefa por meio do modelo PEAS e explique os conceitos com suas próprias palavras. Utilize o capítulo disponibilizado e justifique suas respostas.
 
