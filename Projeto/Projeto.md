@@ -1,6 +1,6 @@
 # Sistema Especialista para Análise de Crédito Bancário
 
-**Disciplina:** Inteligência Artificial e Linguagens Formais e Autômatos (IA/LFA)
+**Disciplina:** Linguagens Formais e Autômatos (LFA)
 **Professora:** Kadidja Valéria
 **Área:** Finanças, análise de crédito e concessão de empréstimos
 **Linguagem:** Python 3 (biblioteca padrão, sem dependências)
