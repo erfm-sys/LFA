@@ -4,7 +4,7 @@
 **Professora:** Kadidja Valéria
 **Área:** Finanças, análise de crédito e concessão de empréstimos
 **Linguagem:** Python 3 (biblioteca padrão, sem dependências)
-**Inferência:** encadeamento para trás (*backward chaining*, dirigido por objetivo) com poda de hipóteses e escolha dinâmica de perguntas
+**Inferência:** encadeamento para trás com poda de hipóteses e escolha dinâmica de perguntas
 
 ---
 
