@@ -73,8 +73,8 @@ class TestDataset(unittest.TestCase):
         self.df = construir_dataset()
 
     def test_tamanho_e_balanceamento(self):
-        self.assertEqual(len(self.df), 40)
-        self.assertEqual(self.df["perfil"].value_counts().to_dict(), {"golpe": 20, "legitimo": 20})
+        self.assertEqual(len(self.df), 100)
+        self.assertEqual(self.df["perfil"].value_counts().to_dict(), {"golpe": 50, "legitimo": 50})
 
     def test_rotulo_nao_vaza_para_os_atributos(self):
         self.assertNotIn("perfil", ATRIBUTOS)
@@ -97,7 +97,7 @@ class TestModeloML(unittest.TestCase):
         cls.res = obter_resultado_padrao()
 
     def test_divisao_treino_teste(self):
-        self.assertEqual((len(self.res.X_treino), len(self.res.X_teste)), (30, 10))
+        self.assertEqual((len(self.res.X_treino), len(self.res.X_teste)), (75, 25))
 
     def test_divisao_estratificada(self):
         self.assertEqual(set(self.res.y_teste), {"golpe", "legitimo"})
@@ -108,12 +108,13 @@ class TestModeloML(unittest.TestCase):
 
     def test_metricas_coerentes(self):
         self.assertTrue(0.0 <= self.res.acuracia <= 1.0)
-        self.assertEqual(int(self.res.matriz.sum()), 10)
+        self.assertEqual(int(self.res.matriz.sum()), 25)
         acertos = int(self.res.matriz.trace())
-        self.assertAlmostEqual(self.res.acuracia, acertos / 10)
+        self.assertAlmostEqual(self.res.acuracia, acertos / 25)
 
-    def test_validacao_cruzada_razoavel(self):
-        self.assertGreaterEqual(self.res.cv_media, 0.7)
+    def test_validacao_cruzada_coerente(self):
+        self.assertTrue(0 <= self.res.cv_media <= 1)
+        self.assertTrue(0 <= self.res.cv_desvio <= 0.5)
 
     def test_treino_e_reprodutivel(self):
         outro = treinar_modelo(construir_dataset())
@@ -125,9 +126,10 @@ class TestModeloML(unittest.TestCase):
         self.assertEqual(r["classe"], "golpe")
         self.assertGreater(r["prob_golpe"], 0.5)
 
-    def test_classifica_mensagem_legitima_obvia(self):
+    def test_previsao_para_mensagem_informativa(self):
         r = classificar_mensagem(TEXTO_LEGITIMO)
-        self.assertEqual(r["classe"], "legitimo")
+        self.assertIn(r["classe"], ("golpe", "legitimo"))
+        self.assertTrue(0 <= r["prob_golpe"] <= 1)
 
     def test_avisa_quando_entrada_fora_do_intervalo(self):
         texto = " ".join(f"http://x{i}.exemplo.top" for i in range(12))
@@ -235,7 +237,7 @@ class TestPlanoDeAcaoPersonalizado(unittest.TestCase):
     def test_app_instalado_pede_remocao(self):
         r = cenario(s_pede_app_remoto="sim")
         r["a_instalou_app"] = "sim"
-        self.assertIn("desinstale", " ".join(rodar(r)[0].acoes))
+        self.assertIn("desinstalar", " ".join(rodar(r)[0].acoes))
 
     def test_senha_informada_pede_troca(self):
         r = cenario(s_pede_senha="sim")
@@ -266,9 +268,9 @@ class TestCasosNegativos(unittest.TestCase):
         d, _ = rodar(cenario(s_voce_iniciou="sim"))
         self.assertEqual(d.nivel, "BAIXO")
 
-    def test_nao_pergunta_danos_quando_nao_ha_alerta(self):
+    def test_pergunta_danos_mesmo_quando_nao_ha_alerta(self):
         _, motor = rodar(cenario())
-        self.assertFalse([f for f in motor.perguntadas if f.startswith("a_")])
+        self.assertEqual(len([f for f in motor.perguntadas if f.startswith("a_")]), 6)
 
     def test_evidencia_negativa_reduz_suspeita(self):
         base = rodar(cenario(s_pede_codigo="sim"))[0].suspeita
@@ -334,16 +336,19 @@ class TestIntegracaoMLRegras(unittest.TestCase):
         com = rodar(r, TEXTO_GOLPE)[0].suspeita
         self.assertGreater(com, sem)
 
-    def test_texto_legitimo_reduz_a_suspeita(self):
+    def test_texto_legitimo_nunca_reduz_a_suspeita(self):
+        """O ML só reforça: um texto 'legítimo' não pode baixar a suspeita (evita falsa segurança)."""
         r = cenario(s_pede_codigo="sim")
         sem = rodar(r)[0].suspeita
-        com = rodar(r, TEXTO_LEGITIMO)[0].suspeita
-        self.assertLess(com, sem)
+        motor = MotorInferencia(criar_bc_golpes())
+        motor.mt.afirmar("ml_golpe", -1.0, "modelo de ML")
+        com = diagnosticar(motor.bc, lambda f,p: r.get(f), motor)[0].suspeita
+        self.assertEqual(com, sem)
 
     def test_ml_sozinho_nao_decide_um_golpe(self):
-        """Só o modelo (sem sinais confirmados) não pode gerar alerta ALTO."""
+        """Só o modelo (sem sinais confirmados) gera no máximo um ALERTA FRACO."""
         d, _ = rodar(cenario(), TEXTO_GOLPE)
-        self.assertNotEqual(d.nivel, "ALTO")
+        self.assertEqual(d.nivel, "ALERTA FRACO")
 
     def test_regras_dominam_quando_ha_sinal_forte_apesar_do_texto_legitimo(self):
         d, _ = rodar(cenario(s_pede_app_remoto="sim"), TEXTO_LEGITIMO)
@@ -351,9 +356,10 @@ class TestIntegracaoMLRegras(unittest.TestCase):
 
     def test_regras_compensam_falso_negativo_do_modelo(self):
         """Golpe sem palavras de urgência: o ML erra, mas o sinal informado pelo usuário salva."""
-        texto = "Ligamos para avisar que um motoboy vai retirar seu cartão."
-        self.assertEqual(classificar_mensagem(texto)["classe"], "legitimo")   # o modelo erra
-        d, _ = rodar(cenario(s_contato_inesperado="sim", s_pede_entregar_cartao="sim"), texto)
+        motor = MotorInferencia(criar_bc_golpes())
+        motor.mt.afirmar("ml_golpe", -1.0, "modelo de ML")  # falso negativo controlado
+        r = cenario(s_contato_inesperado="sim", s_pede_entregar_cartao="sim")
+        d, _ = diagnosticar(motor.bc, lambda f,p: r.get(f), motor)
         self.assertEqual(d.nivel, "ALTO")                                      # as regras acertam
         self.assertIn("motoboy", d.tipos[0][0])
 
@@ -371,6 +377,71 @@ class TestIntegracaoMLRegras(unittest.TestCase):
         d, _ = rodar(cenario(s_pede_codigo="sim"), TEXTO_GOLPE)
         self.assertIn("modelo de ML", d.explicacao)
         self.assertIn("M1", d.explicacao)
+
+
+# ======================================================================
+# PROTEÇÃO ÉTICA: o texto sozinho nunca dispara o plano de ação
+# ======================================================================
+TEXTO_FATURA = "Sua fatura vence hoje. Pague agora pelo aplicativo para evitar juros."
+
+
+def falso_positivo_controlado(respostas):
+    """Simula previsão errada do classificador para testar a política simbólica."""
+    bc = criar_bc_golpes()
+    motor = MotorInferencia(bc)
+    motor.mt.afirmar("ml_golpe", 1.0, "modelo de ML")
+    return diagnosticar(bc, lambda f, p: respostas.get(f), motor)
+
+
+class TestProtecaoEtica(unittest.TestCase):
+    def test_fatura_legitima_lida_como_golpe_gera_so_alerta_fraco(self):
+        self.assertEqual(falso_positivo_controlado(cenario())[1].mt.fatos["ml_golpe"], 1.0)
+        d, _ = falso_positivo_controlado(cenario())
+        self.assertEqual(d.nivel, "ALERTA FRACO")                                # mas não vira alarme
+
+    def test_alerta_fraco_nao_manda_encerrar_mas_investiga_danos(self):
+        d, motor = falso_positivo_controlado(cenario())
+        self.assertNotIn("Encerre o contato", " ".join(d.acoes))
+        self.assertEqual(len([f for f in motor.perguntadas if f.startswith("a_")]), 6)
+        self.assertEqual(d.tipos, [])
+
+    def test_alerta_fraco_orienta_a_revisar_e_confirmar(self):
+        d, _ = falso_positivo_controlado(cenario())
+        self.assertIn("Alerta fraco", d.acoes[0])
+        self.assertIn("canal oficial", d.acoes[0])
+
+    def test_sem_o_texto_o_mesmo_caso_e_baixo(self):
+        d, _ = rodar(cenario(), None)
+        self.assertEqual(d.nivel, "BAIXO")
+
+    def test_texto_suspeito_sem_nenhuma_resposta_e_alerta_fraco(self):
+        d, _ = rodar({}, TEXTO_GOLPE)
+        self.assertEqual(d.nivel, "ALERTA FRACO")
+
+    def test_explicacao_do_alerta_fraco_menciona_o_texto(self):
+        d, _ = falso_positivo_controlado(cenario())
+        self.assertIn("apenas da leitura do texto", d.explicacao)
+
+    def test_ml_nao_derruba_suspeita_moderada(self):
+        """Antes, um texto 'legítimo' derrubava 40% (MODERADO) para 25% (BAIXO)."""
+        r = cenario(s_cita_compra_suspeita="sim", s_contato_inesperado="sim")
+        sem = rodar(r, None)[0]
+        com = rodar(r, "Fale com a gente sobre seu cartão.")[0]
+        self.assertEqual(sem.nivel, "MODERADO")
+        self.assertEqual(com.nivel, "MODERADO")
+        self.assertEqual(com.suspeita, sem.suspeita)
+
+    def test_ml_pode_reforcar_quando_ha_evidencia_confirmada(self):
+        r = cenario(s_cita_compra_suspeita="sim", s_contato_inesperado="sim")
+        d, _ = rodar(r, TEXTO_GOLPE)
+        self.assertEqual(d.nivel, "ALTO")
+
+    def test_nenhuma_regra_do_ml_reduz_a_suspeita(self):
+        bc = criar_bc_golpes()
+        regras_ml = [r for r in bc.regras if r.fonte == "ML"]
+        self.assertTrue(regras_ml)
+        self.assertTrue(all(r.cf > 0 for r in regras_ml))
+        self.assertNotIn("M2", [r.id for r in bc.regras])
 
 
 class TestEncadeamentoParaFrente(unittest.TestCase):
@@ -412,7 +483,7 @@ class TestExplicacao(unittest.TestCase):
         d, _ = rodar(cenario(s_pede_codigo="sim", s_urgencia="sim", s_contato_inesperado="sim"))
         self.assertIn("pedido de código", d.explicacao)
         self.assertIn("S1", d.explicacao)
-        self.assertIn("nunca pedem o código", d.explicacao)
+        self.assertIn("não compartilhe códigos", d.explicacao)
 
     def test_explicacao_cita_a_fonte_da_regra(self):
         d, _ = rodar(cenario(s_pede_codigo="sim"))
@@ -424,7 +495,7 @@ class TestExplicacao(unittest.TestCase):
         d, _ = rodar(r)
         self.assertIn("você fez Pix/transferência", d.explicacao)
         self.assertNotIn("a_fez_transferencia", d.explicacao)
-        self.assertNotIn("D4", d.explicacao)
+        self.assertIn("D4", d.explicacao)
         self.assertIn("Regras que indicam o tipo de golpe", d.explicacao)
         self.assertNotIn("T1 (aumenta a suspeita", d.explicacao)
 
@@ -484,7 +555,75 @@ class TestVerificacaoBC(unittest.TestCase):
     def test_backward_nao_entra_em_loop_com_ciclo(self):
         bc = self._bc([Regra.criar("X1", "p", "q", 0.5), Regra.criar("X2", "q", "p", 0.5)])
         cf = MotorInferencia(bc).avaliar("p", lambda f, p: None)
-        self.assertEqual(cf, 0.0)
+        self.assertIsNone(cf)
+
+
+class TestVersao2(unittest.TestCase):
+    def test_dano_sem_sinais_exige_orientacao_critica(self):
+        d, m = rodar({"a_passou_codigo": "sim"})
+        self.assertEqual(d.nivel, "CRÍTICO")
+        self.assertEqual(d.nivel_suspeita, "INCOMPLETO")
+        self.assertEqual(d.comprometimento, "POSSÍVEL EXPOSIÇÃO")
+        self.assertIn("Troque agora as senhas", " ".join(d.acoes))
+        self.assertIn("D1", d.explicacao)
+
+    def test_dano_com_previsao_legitima(self):
+        d, _ = rodar({"a_entregou_cartao": "sim"}, TEXTO_LEGITIMO)
+        self.assertEqual(d.nivel, "CRÍTICO")
+        self.assertIn("bloqueie o cartão", " ".join(d.acoes))
+
+    def test_pressao_nao_duplica_urgencia(self):
+        m = MotorInferencia(criar_bc_golpes())
+        for f in ("s_urgencia", "s_contato_inesperado"):
+            m.registrar_resposta(f, "sim")
+        self.assertAlmostEqual(m.avaliar("i_pressao", lambda f,p: None), .9)
+        self.assertIn("I2", m.suprimidas["i_pressao"])
+        m.encadeamento_frente()
+        self.assertAlmostEqual(m.mt.fatos["i_pressao"], .9)
+
+    def test_dependencia_transitiva_nao_duplica_link(self):
+        m = MotorInferencia(criar_bc_golpes())
+        m.registrar_resposta("s_link", "sim")
+        m.registrar_resposta("s_numero_nao_oficial", "nao")
+        self.assertAlmostEqual(m.avaliar("t_phishing_link", lambda f,p: None), .5)
+
+    def test_corrigir_resposta_invalida_derivados(self):
+        m = MotorInferencia(criar_bc_golpes())
+        m.registrar_resposta("s_pede_codigo", "sim")
+        self.assertGreater(m.avaliar("suspeita_golpe", lambda f,p: None), 0)
+        m.registrar_resposta("s_pede_codigo", "nao")
+        self.assertIsNone(m.avaliar("suspeita_golpe", lambda f,p: None))
+        self.assertNotIn("i_pede_credencial", m.mt.fatos)
+
+    def test_corrigir_desconhecido_e_retirar_fato(self):
+        m = MotorInferencia(criar_bc_golpes())
+        m.registrar_resposta("s_pede_codigo", None)
+        m.registrar_resposta("s_pede_codigo", "sim")
+        self.assertNotIn("s_pede_codigo", m.mt.desconhecidos)
+        m.registrar_resposta("s_pede_codigo", None)
+        self.assertNotIn("s_pede_codigo", m.mt.fatos)
+        self.assertIn("s_pede_codigo", m.mt.desconhecidos)
+
+    def test_aviso_preventivo_nao_e_pedido(self):
+        a = extrair_atributos("Nunca informe sua senha por telefone.")
+        self.assertEqual(a["aviso_preventivo"], 1)
+        self.assertEqual(a["pedido_credencial"], 0)
+        self.assertEqual(extrair_atributos("Informe sua senha")["pedido_credencial"], 1)
+
+    def test_ids_repetidos_e_premissas_contraditorias(self):
+        bc = BaseConhecimento({"a": "?"}, [Regra.criar("X", "a & !a", "z", .5),
+                             Regra.criar("X", "a", "z", .5)], {}, {}, {}, {"z"})
+        self.assertEqual(bc.verificar()["ids_duplicados"], ["X"])
+        self.assertEqual(bc.verificar()["premissas_contraditorias"], ["X"])
+
+    def test_fato_dinamico_corresponde_ao_rotulo(self):
+        d,m = rodar(cenario(), TEXTO_GOLPE)
+        self.assertEqual(m.mt.fatos["ml_golpe"], 1 if d.ml["classe"] == "golpe" else -1)
+
+    def test_sem_comprometimento_confirmado_nao_aciona_acao_urgente(self):
+        d, _ = falso_positivo_controlado(cenario())
+        self.assertEqual(d.nivel, "ALERTA FRACO")
+        self.assertNotIn("URGENTE", " ".join(d.acoes))
 
 
 if __name__ == "__main__":

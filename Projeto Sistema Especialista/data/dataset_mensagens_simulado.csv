@@ -1,0 +1,101 @@
+texto,n_links,n_urgencia,n_dados_sensiveis,n_verbos_pedido,n_exclamacoes,pct_maiusculas,pedido_credencial,aviso_preventivo,pedido_acao_risco,perfil
+URGENTE! Sua conta foi bloqueada. Regularize agora em https://banco-seguro.example.invalid/login e informe sua senha.,1,3,1,2,1,9.5,1,0,0,golpe
+"Identificamos uma compra suspeita no seu cartão. Para cancelar, informe o código enviado por SMS imediatamente.",0,1,1,1,0,5.4,1,0,0,golpe
+Sou da central de segurança do Banco Exemplo. Sua conta foi invadida. Faça um Pix para uma conta segura agora para proteger seu saldo.,0,1,1,1,0,5.6,0,0,1,golpe
+Seu cartão foi clonado. Um motoboy irá buscá-lo hoje. Corte o cartão sem danificar o chip e informe a senha.,0,1,1,2,0,3.5,1,0,0,golpe
+Atenção: instale o aplicativo de suporte para liberar o acesso e resolver o bloqueio da sua conta imediatamente.,0,2,0,1,0,1.1,0,0,0,golpe
+Parabéns! Você ganhou aumento de limite! Clique em https://limite-premiado.example.invalid e confirme seu CPF e senha.,1,0,2,2,2,6.3,1,0,0,golpe
+Operadora Exemplo: seu chip será suspenso hoje. Atualize seus dados em https://chip-ativo.example.invalid e informe o código recebido.,1,2,1,2,0,2.8,1,0,0,golpe
+"Cashback de R$ 500 liberado! Pague a taxa de liberação de R$ 29,90 via Pix para receber seu prêmio.",0,0,1,1,1,7.2,0,0,1,golpe
+Detectamos um novo aparelho conectado à sua conta. Confirme sua senha e o token para cancelar a operação agora.,0,1,2,1,0,2.2,1,0,0,golpe
+Seu Pix de R$ 3.200 foi bloqueado. Transferência pendente: regularize o pagamento em 1 hora para evitar multa.,0,2,2,1,0,4.8,0,0,1,golpe
+BANCO EXEMPLO: SUA CONTA SERÁ ENCERRADA HOJE!!! ACESSE https://exemplo-banco.example.invalid E CONFIRME SEUS DADOS AGORA!!!,1,3,0,1,6,68.0,0,0,0,golpe
+"Houve tentativa de fraude. Para sua segurança, passe o código de 6 dígitos que enviamos por SMS.",0,0,1,1,0,6.6,1,0,0,golpe
+Aqui é do setor antifraude. Precisamos validar seu CPF e a senha do cartão para estornar a compra indevida.,0,0,2,0,0,5.7,0,0,0,golpe
+Seu cadastro expira hoje. Clique no link para atualizar e evitar o bloqueio do cartão: www.atualiza-cadastro.exemplo.com/app,1,3,0,2,0,2.0,0,0,0,golpe
+"Devolução disponível: informe seu token e faça uma transferência de validação de R$ 1,00.",0,0,2,2,0,2.9,1,0,1,golpe
+Atendimento da Operadora Exemplo: você tem bônus de internet. Digite o código recebido para ativar agora.,0,1,1,1,0,4.6,1,0,0,golpe
+Seu cartão foi bloqueado por segurança. Entregue o cartão ao nosso portador e informe a senha para desbloquear.,0,1,1,3,0,2.2,1,0,1,golpe
+"Compra de R$ 4.890 em andamento. Se não reconhece, ligue já para [número fictício] e informe seu CPF e senha.",0,0,2,2,0,7.6,1,0,0,golpe
+Boleto de regularização pendente. Pague agora via Pix para liberar seu limite. Chave aleatória abaixo.,0,1,1,2,0,4.7,0,0,0,golpe
+Seu acesso será suspenso. Instale o app e informe o token para manter a conta ativa.,0,1,1,2,0,3.0,1,0,0,golpe
+"Compra aprovada no cartão final 1234, R$ 54,90, em Mercado Exemplo.",0,0,0,0,0,9.1,0,0,0,legitimo
+Sua fatura do cartão já está disponível no aplicativo. Vencimento em 10/12.,0,0,0,0,0,3.5,0,0,0,legitimo
+Seu código de acesso é XXX. Não compartilhe com ninguém. Validade: 5 minutos.,0,0,1,0,0,10.0,0,1,0,legitimo
+"Pix recebido de Pessoa Exemplo no valor de R$ 120,00.",0,0,1,0,0,11.1,0,0,0,legitimo
+Lembrete: sua fatura vence amanhã. Pague pelo aplicativo ou pelo internet banking.,0,0,0,1,0,2.9,0,0,0,legitimo
+Olá! Seu pedido saiu para entrega e chega hoje entre 14h e 18h.,0,1,0,0,1,4.4,0,0,0,legitimo
+"Sua agência atende de segunda a sexta, das 10h às 16h.",0,0,0,0,0,2.6,0,0,0,legitimo
+Aviso: nunca informe senha ou código por telefone. O banco nunca solicita esses dados.,0,0,2,1,0,2.9,0,1,0,legitimo
+Seu extrato de novembro está disponível. Acesse o aplicativo para consultar.,0,0,0,0,0,3.1,0,0,0,legitimo
+"Transferência agendada para 20/11 no valor de R$ 300,00 realizada com sucesso.",0,0,1,0,0,3.7,0,0,1,legitimo
+Seu plano foi renovado. Franquia de 20 GB disponível até 15/12.,0,0,0,0,0,9.1,0,0,0,legitimo
+Confirmação: seu limite foi ajustado conforme solicitado por você no aplicativo.,0,0,0,0,0,1.5,0,0,0,legitimo
+"Código de verificação XXX. Se não foi você, ignore esta mensagem.",0,0,1,0,0,9.6,0,0,0,legitimo
+O prazo para declarar o imposto termina em breve. Veja o guia no site oficial https://gov.example.invalid/guia,1,1,0,0,0,2.3,0,0,0,legitimo
+Oferta para clientes: 5% de desconto na primeira compra. Válido até domingo.,0,0,0,0,0,3.3,0,0,0,legitimo
+"Sua senha foi alterada com sucesso. Se não reconhece, ligue para o número do verso do cartão.",0,0,1,1,0,2.7,0,0,0,legitimo
+Atualização do app disponível! Atualize pela loja oficial quando puder.,0,0,0,1,1,3.3,0,0,0,legitimo
+Seu cartão foi enviado e chega em até 7 dias úteis. Acompanhe pelo aplicativo.,0,0,0,0,0,3.2,0,0,0,legitimo
+Pagamento do boleto confirmado. Obrigado!,0,0,0,0,1,5.7,0,0,0,legitimo
+Informe-nos sua opinião: avalie o atendimento em até 3 dias no aplicativo.,0,0,0,1,0,1.7,0,0,0,legitimo
+Aqui é do banco. Precisamos que você leia os números que chegaram por mensagem para cancelar uma compra.,0,0,0,0,0,2.4,0,0,0,golpe
+A central solicita a entrega do cartão ao mensageiro que está a caminho.,0,0,0,0,0,1.7,0,0,0,golpe
+Mova o saldo para a chave indicada pelo atendimento para proteger a conta.,0,0,0,0,0,1.6,0,0,0,golpe
+"Para verificar o dispositivo, permita que eu veja sua tela pelo programa de suporte.",0,0,0,0,0,1.4,0,0,0,golpe
+Seu prêmio exige uma tarifa antecipada de liberação.,0,0,0,0,0,2.3,0,0,1,golpe
+Confirme os dados do cartão na página encaminhada pelo atendimento.,0,0,0,1,0,1.8,0,0,0,golpe
+"Oi, sou do banco, me manda o cod que apareceu no celular pfv.",0,0,0,0,0,2.2,1,0,0,golpe
+"Para validar o chip, mande o PIN pelo chat.",0,0,0,0,0,12.1,0,0,0,golpe
+"Para cancelar a cobrança, precisamos acessar seu aparelho.",0,0,0,0,0,2.0,0,0,0,golpe
+Seu cartão precisa ser devolvido ao coletor da agência.,0,0,0,0,0,2.2,0,0,0,golpe
+Envie uma foto dos dois lados do cartão para a análise.,0,0,0,1,0,2.3,0,0,0,golpe
+O reembolso depende de um depósito prévio para o analista.,0,0,1,0,0,2.1,0,0,1,golpe
+"Para proteger a poupança, envie o saldo para a conta que indicamos.",0,0,0,1,0,1.9,0,0,0,golpe
+Compartilhe a tela enquanto abre o aplicativo bancário.,0,0,0,0,0,2.1,0,0,1,golpe
+Receba seu bônus pagando uma taxa de cadastro ao representante.,0,0,0,0,0,1.9,0,0,1,golpe
+Precisamos da sequência de autenticação para validar sua identidade.,0,0,0,0,0,1.7,0,0,0,golpe
+Envie a senha do portal da operadora pelo WhatsApp.,0,0,1,1,0,7.1,1,0,0,golpe
+Cadastre o dispositivo do atendimento como autorizado na sua conta.,0,0,0,0,0,1.8,0,0,0,golpe
+Entregue o chip ao funcionário externo para validar a troca.,0,0,0,1,0,2.0,0,0,0,golpe
+Precisamos da palavra secreta da conta para confirmar o cadastro.,0,0,0,0,0,1.8,0,0,0,golpe
+Passe o código de recuperação do aplicativo para a central.,0,0,1,1,0,2.0,1,0,0,golpe
+Instale o programa de suporte para que o técnico controle a tela.,0,0,0,1,0,1.9,0,0,0,golpe
+Você receberá o benefício depois de uma transferência de confirmação.,0,0,1,0,0,1.7,0,0,1,golpe
+Aprove a operação que aparece na tela para cancelar a cobrança.,0,0,0,0,0,1.9,0,0,0,golpe
+Faça o pagamento antecipado para desfazer o empréstimo que apareceu na conta.,0,0,0,1,0,1.5,0,0,0,golpe
+Preencha as credenciais no formulário encaminhado pelo chat.,0,0,0,0,0,1.9,0,0,0,golpe
+Escaneie o QR para enviar o saldo à conta de proteção.,0,0,0,0,0,7.0,0,0,0,golpe
+Um representante vai recolher seu cartão danificado em casa.,0,0,0,0,0,2.0,0,0,0,golpe
+Forneça a chave de recuperação da conta digital ao atendente.,0,0,0,1,0,2.0,0,0,0,golpe
+Desative a proteção do aparelho para que o suporte faça a verificação.,0,0,0,1,0,1.7,0,0,0,golpe
+Alerta de segurança: não envie códigos de confirmação a terceiros.,0,0,1,1,0,1.8,0,1,0,legitimo
+Sua fatura vence hoje. Consulte o valor diretamente no aplicativo que já utiliza.,0,1,0,0,0,3.0,0,0,0,legitimo
+A instituição comunica manutenção programada para esta madrugada.,0,0,0,0,0,1.8,0,0,0,legitimo
+O cartão final XXXX foi utilizado em uma compra que você pode consultar no aplicativo.,0,0,0,0,0,7.0,0,0,0,legitimo
+Não informe sua senha a quem entrar em contato por telefone.,0,0,1,1,0,2.0,0,1,0,legitimo
+Seu limite permanece o mesmo. Consulte os detalhes no aplicativo.,0,0,0,0,0,3.7,0,0,0,legitimo
+A operadora informa que sua franquia mensal foi renovada.,0,0,0,0,0,2.1,0,0,0,legitimo
+"Se você não reconhece a compra, abra o aplicativo oficial por conta própria.",0,0,0,0,0,1.6,0,0,0,legitimo
+Atenção! O prazo da fatura termina hoje; não responda com dados pessoais.,0,2,0,0,1,3.4,0,1,0,legitimo
+Oi! Seu pacote de internet foi renovado com sucesso.,0,0,0,0,1,4.8,0,0,0,legitimo
+O extrato está disponível para consulta na área autenticada.,0,0,0,0,0,2.0,0,0,0,legitimo
+A solicitação de segunda via que você iniciou foi concluída.,0,0,0,0,0,2.0,0,0,0,legitimo
+Seu cartão virtual foi desativado conforme sua solicitação.,0,0,0,0,0,2.0,0,0,0,legitimo
+Nunca permita acesso remoto a alguém que ligue em nome do banco.,0,0,0,1,0,1.9,0,1,0,legitimo
+O pagamento agendado foi processado; confira o comprovante no aplicativo.,0,0,0,0,0,1.6,0,0,0,legitimo
+Código de verificação fictício: XXX. Não informe esse código por telefone.,0,0,1,1,0,8.2,0,1,0,legitimo
+Seu plano mensal será atualizado na próxima data de renovação.,0,0,0,1,0,1.9,0,0,0,legitimo
+A agência terá horário especial no feriado.,0,0,0,0,0,2.8,0,0,0,legitimo
+Seu cadastro foi atualizado por você na área autenticada.,0,0,0,1,0,2.1,0,0,0,legitimo
+Seu depósito foi registrado; o extrato já reflete a movimentação.,0,0,1,0,0,1.9,0,0,0,legitimo
+A transferência recebida está disponível no histórico.,0,0,1,0,0,2.1,0,0,1,legitimo
+"Em caso de bloqueio, procure por conta própria o canal oficial.",0,1,0,0,0,2.0,0,0,0,legitimo
+Sua senha foi redefinida a partir da solicitação feita no aplicativo.,0,0,1,0,0,1.7,1,0,0,legitimo
+Comunicado: a instituição não recolhe cartões na residência.,0,0,0,0,0,2.0,0,0,1,legitimo
+Seu protocolo de atendimento já está disponível na área do cliente.,0,0,0,0,0,1.8,0,0,0,legitimo
+"A promoção está descrita na seção de benefícios do aplicativo, sem taxa de adesão.",0,0,0,0,0,1.5,0,0,1,legitimo
+O serviço de mensagens ficará indisponível durante a manutenção.,0,0,0,0,0,1.8,0,0,0,legitimo
+Atenção: nunca transfira dinheiro para uma suposta conta segura.,0,0,0,1,0,1.9,0,1,0,legitimo
+A pesquisa de satisfação é opcional e não solicita informações bancárias.,0,0,0,0,0,1.6,0,0,0,legitimo
+O pacote adicional que você contratou já está ativo.,0,0,0,0,0,2.3,0,0,0,legitimo

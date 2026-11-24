@@ -10,7 +10,7 @@ Arquitetura híbrida em duas fases:
           fato às respostas do usuário e entregam: grau de suspeita (fatores de
           certeza), tipo de golpe e plano de ação, com explicação.
 
-Este arquivo é gerado a partir do notebook (notebooks/sistema_especialista_golpes.ipynb).
+Este módulo é a fonte principal; o notebook contém uma cópia sincronizada para uso autônomo no Colab.
 Use:  python src/sistema_golpes.py   (consulta interativa no terminal)
 
 Aviso: dados de treino SIMULADOS; ferramenta educacional de apoio. Não substitui o
@@ -31,34 +31,34 @@ from sklearn.tree import DecisionTreeClassifier
 # Métricas de avaliação: acurácia e matriz de confusão
 from sklearn.metrics import accuracy_score, confusion_matrix
 
-# Mensagens fictícias (texto, rótulo). Dados SIMULADOS, escritos pelo autor para fins didáticos.
+# Mensagens fictícias (texto, rótulo), preparadas para o trabalho com auxílio de IA.
 MENSAGENS_SIMULADAS = [
     # ---------------- golpes (20) ----------------
-    ("URGENTE! Sua conta foi bloqueada. Regularize agora em http://banco-seguro.exemplo.top/login e informe sua senha.", "golpe"),
+    ("URGENTE! Sua conta foi bloqueada. Regularize agora em https://banco-seguro.example.invalid/login e informe sua senha.", "golpe"),
     ("Identificamos uma compra suspeita no seu cartão. Para cancelar, informe o código enviado por SMS imediatamente.", "golpe"),
     ("Sou da central de segurança do Banco Exemplo. Sua conta foi invadida. Faça um Pix para uma conta segura agora para proteger seu saldo.", "golpe"),
     ("Seu cartão foi clonado. Um motoboy irá buscá-lo hoje. Corte o cartão sem danificar o chip e informe a senha.", "golpe"),
     ("Atenção: instale o aplicativo de suporte para liberar o acesso e resolver o bloqueio da sua conta imediatamente.", "golpe"),
-    ("Parabéns! Você ganhou aumento de limite! Clique em www.limite-premiado.exemplo.link e confirme seu CPF e senha.", "golpe"),
-    ("Operadora Exemplo: seu chip será suspenso hoje. Atualize seus dados em bit.ly/chip-ativo e informe o código recebido.", "golpe"),
+    ("Parabéns! Você ganhou aumento de limite! Clique em https://limite-premiado.example.invalid e confirme seu CPF e senha.", "golpe"),
+    ("Operadora Exemplo: seu chip será suspenso hoje. Atualize seus dados em https://chip-ativo.example.invalid e informe o código recebido.", "golpe"),
     ("Cashback de R$ 500 liberado! Pague a taxa de liberação de R$ 29,90 via Pix para receber seu prêmio.", "golpe"),
     ("Detectamos um novo aparelho conectado à sua conta. Confirme sua senha e o token para cancelar a operação agora.", "golpe"),
     ("Seu Pix de R$ 3.200 foi bloqueado. Transferência pendente: regularize o pagamento em 1 hora para evitar multa.", "golpe"),
-    ("BANCO EXEMPLO: SUA CONTA SERÁ ENCERRADA HOJE!!! ACESSE http://exemplo-banco.top E CONFIRME SEUS DADOS AGORA!!!", "golpe"),
+    ("BANCO EXEMPLO: SUA CONTA SERÁ ENCERRADA HOJE!!! ACESSE https://exemplo-banco.example.invalid E CONFIRME SEUS DADOS AGORA!!!", "golpe"),
     ("Houve tentativa de fraude. Para sua segurança, passe o código de 6 dígitos que enviamos por SMS.", "golpe"),
     ("Aqui é do setor antifraude. Precisamos validar seu CPF e a senha do cartão para estornar a compra indevida.", "golpe"),
     ("Seu cadastro expira hoje. Clique no link para atualizar e evitar o bloqueio do cartão: www.atualiza-cadastro.exemplo.com/app", "golpe"),
     ("Devolução disponível: informe seu token e faça uma transferência de validação de R$ 1,00.", "golpe"),
     ("Atendimento da Operadora Exemplo: você tem bônus de internet. Digite o código recebido para ativar agora.", "golpe"),
     ("Seu cartão foi bloqueado por segurança. Entregue o cartão ao nosso portador e informe a senha para desbloquear.", "golpe"),
-    ("Compra de R$ 4.890 em andamento. Se não reconhece, ligue já para 0800 000 0000 e informe seu CPF e senha.", "golpe"),
+    ("Compra de R$ 4.890 em andamento. Se não reconhece, ligue já para [número fictício] e informe seu CPF e senha.", "golpe"),
     ("Boleto de regularização pendente. Pague agora via Pix para liberar seu limite. Chave aleatória abaixo.", "golpe"),
     ("Seu acesso será suspenso. Instale o app e informe o token para manter a conta ativa.", "golpe"),
     # ---------------- legítimas (20) ----------------
     ("Compra aprovada no cartão final 1234, R$ 54,90, em Mercado Exemplo.", "legitimo"),
     ("Sua fatura do cartão já está disponível no aplicativo. Vencimento em 10/12.", "legitimo"),
-    ("Seu código de acesso é 482913. Não compartilhe com ninguém. Validade: 5 minutos.", "legitimo"),
-    ("Pix recebido de Maria Silva no valor de R$ 120,00.", "legitimo"),
+    ("Seu código de acesso é XXX. Não compartilhe com ninguém. Validade: 5 minutos.", "legitimo"),
+    ("Pix recebido de Pessoa Exemplo no valor de R$ 120,00.", "legitimo"),
     ("Lembrete: sua fatura vence amanhã. Pague pelo aplicativo ou pelo internet banking.", "legitimo"),
     ("Olá! Seu pedido saiu para entrega e chega hoje entre 14h e 18h.", "legitimo"),
     ("Sua agência atende de segunda a sexta, das 10h às 16h.", "legitimo"),
@@ -67,21 +67,83 @@ MENSAGENS_SIMULADAS = [
     ("Transferência agendada para 20/11 no valor de R$ 300,00 realizada com sucesso.", "legitimo"),
     ("Seu plano foi renovado. Franquia de 20 GB disponível até 15/12.", "legitimo"),
     ("Confirmação: seu limite foi ajustado conforme solicitado por você no aplicativo.", "legitimo"),
-    ("Código de verificação 771204. Se não foi você, ignore esta mensagem.", "legitimo"),
-    ("O prazo para declarar o imposto termina em breve. Veja o guia no site oficial www.gov.exemplo.br/guia", "legitimo"),
+    ("Código de verificação XXX. Se não foi você, ignore esta mensagem.", "legitimo"),
+    ("O prazo para declarar o imposto termina em breve. Veja o guia no site oficial https://gov.example.invalid/guia", "legitimo"),
     ("Oferta para clientes: 5% de desconto na primeira compra. Válido até domingo.", "legitimo"),
     ("Sua senha foi alterada com sucesso. Se não reconhece, ligue para o número do verso do cartão.", "legitimo"),
     ("Atualização do app disponível! Atualize pela loja oficial quando puder.", "legitimo"),
     ("Seu cartão foi enviado e chega em até 7 dias úteis. Acompanhe pelo aplicativo.", "legitimo"),
     ("Pagamento do boleto confirmado. Obrigado!", "legitimo"),
     ("Informe-nos sua opinião: avalie o atendimento em até 3 dias no aplicativo.", "legitimo"),
+    # Outros 60 exemplos simulados.
+    ('Aqui é do banco. Precisamos que você leia os números que chegaram por mensagem para cancelar uma compra.', 'golpe'),
+    ('A central solicita a entrega do cartão ao mensageiro que está a caminho.', 'golpe'),
+    ('Mova o saldo para a chave indicada pelo atendimento para proteger a conta.', 'golpe'),
+    ('Para verificar o dispositivo, permita que eu veja sua tela pelo programa de suporte.', 'golpe'),
+    ('Seu prêmio exige uma tarifa antecipada de liberação.', 'golpe'),
+    ('Confirme os dados do cartão na página encaminhada pelo atendimento.', 'golpe'),
+    ('Oi, sou do banco, me manda o cod que apareceu no celular pfv.', 'golpe'),
+    ('Para validar o chip, mande o PIN pelo chat.', 'golpe'),
+    ('Para cancelar a cobrança, precisamos acessar seu aparelho.', 'golpe'),
+    ('Seu cartão precisa ser devolvido ao coletor da agência.', 'golpe'),
+    ('Envie uma foto dos dois lados do cartão para a análise.', 'golpe'),
+    ('O reembolso depende de um depósito prévio para o analista.', 'golpe'),
+    ('Para proteger a poupança, envie o saldo para a conta que indicamos.', 'golpe'),
+    ('Compartilhe a tela enquanto abre o aplicativo bancário.', 'golpe'),
+    ('Receba seu bônus pagando uma taxa de cadastro ao representante.', 'golpe'),
+    ('Precisamos da sequência de autenticação para validar sua identidade.', 'golpe'),
+    ('Envie a senha do portal da operadora pelo WhatsApp.', 'golpe'),
+    ('Cadastre o dispositivo do atendimento como autorizado na sua conta.', 'golpe'),
+    ('Entregue o chip ao funcionário externo para validar a troca.', 'golpe'),
+    ('Precisamos da palavra secreta da conta para confirmar o cadastro.', 'golpe'),
+    ('Passe o código de recuperação do aplicativo para a central.', 'golpe'),
+    ('Instale o programa de suporte para que o técnico controle a tela.', 'golpe'),
+    ('Você receberá o benefício depois de uma transferência de confirmação.', 'golpe'),
+    ('Aprove a operação que aparece na tela para cancelar a cobrança.', 'golpe'),
+    ('Faça o pagamento antecipado para desfazer o empréstimo que apareceu na conta.', 'golpe'),
+    ('Preencha as credenciais no formulário encaminhado pelo chat.', 'golpe'),
+    ('Escaneie o QR para enviar o saldo à conta de proteção.', 'golpe'),
+    ('Um representante vai recolher seu cartão danificado em casa.', 'golpe'),
+    ('Forneça a chave de recuperação da conta digital ao atendente.', 'golpe'),
+    ('Desative a proteção do aparelho para que o suporte faça a verificação.', 'golpe'),
+    ('Alerta de segurança: não envie códigos de confirmação a terceiros.', 'legitimo'),
+    ('Sua fatura vence hoje. Consulte o valor diretamente no aplicativo que já utiliza.', 'legitimo'),
+    ('A instituição comunica manutenção programada para esta madrugada.', 'legitimo'),
+    ('O cartão final XXXX foi utilizado em uma compra que você pode consultar no aplicativo.', 'legitimo'),
+    ('Não informe sua senha a quem entrar em contato por telefone.', 'legitimo'),
+    ('Seu limite permanece o mesmo. Consulte os detalhes no aplicativo.', 'legitimo'),
+    ('A operadora informa que sua franquia mensal foi renovada.', 'legitimo'),
+    ('Se você não reconhece a compra, abra o aplicativo oficial por conta própria.', 'legitimo'),
+    ('Atenção! O prazo da fatura termina hoje; não responda com dados pessoais.', 'legitimo'),
+    ('Oi! Seu pacote de internet foi renovado com sucesso.', 'legitimo'),
+    ('O extrato está disponível para consulta na área autenticada.', 'legitimo'),
+    ('A solicitação de segunda via que você iniciou foi concluída.', 'legitimo'),
+    ('Seu cartão virtual foi desativado conforme sua solicitação.', 'legitimo'),
+    ('Nunca permita acesso remoto a alguém que ligue em nome do banco.', 'legitimo'),
+    ('O pagamento agendado foi processado; confira o comprovante no aplicativo.', 'legitimo'),
+    ('Código de verificação fictício: XXX. Não informe esse código por telefone.', 'legitimo'),
+    ('Seu plano mensal será atualizado na próxima data de renovação.', 'legitimo'),
+    ('A agência terá horário especial no feriado.', 'legitimo'),
+    ('Seu cadastro foi atualizado por você na área autenticada.', 'legitimo'),
+    ('Seu depósito foi registrado; o extrato já reflete a movimentação.', 'legitimo'),
+    ('A transferência recebida está disponível no histórico.', 'legitimo'),
+    ('Em caso de bloqueio, procure por conta própria o canal oficial.', 'legitimo'),
+    ('Sua senha foi redefinida a partir da solicitação feita no aplicativo.', 'legitimo'),
+    ('Comunicado: a instituição não recolhe cartões na residência.', 'legitimo'),
+    ('Seu protocolo de atendimento já está disponível na área do cliente.', 'legitimo'),
+    ('A promoção está descrita na seção de benefícios do aplicativo, sem taxa de adesão.', 'legitimo'),
+    ('O serviço de mensagens ficará indisponível durante a manutenção.', 'legitimo'),
+    ('Atenção: nunca transfira dinheiro para uma suposta conta segura.', 'legitimo'),
+    ('A pesquisa de satisfação é opcional e não solicita informações bancárias.', 'legitimo'),
+    ('O pacote adicional que você contratou já está ativo.', 'legitimo'),
 ]
 
-# Lista oficial de atributos (colunas de X). O rótulo "perfil" NUNCA entra aqui.
+# Atributos de entrada (X), sem o rótulo.
 ATRIBUTOS = ["n_links", "n_urgencia", "n_dados_sensiveis",
-             "n_verbos_pedido", "n_exclamacoes", "pct_maiusculas"]
+             "n_verbos_pedido", "n_exclamacoes", "pct_maiusculas",
+             "pedido_credencial", "aviso_preventivo", "pedido_acao_risco"]
 
-# Dicionários de palavras (sem acento, em minúsculas). Cada item é um "prefixo" de palavra.
+# Prefixos de palavras usados na extração de atributos.
 TERMOS_URGENCIA = ["urgente", "imediat", "agora", "hoje", "bloque", "ultimas horas",
                    "expira", "suspens", "prazo", "encerrad", "1 hora"]
 TERMOS_SENSIVEIS = ["senha", "cvv", "codigo", "token", "cpf", "pix",
@@ -89,7 +151,7 @@ TERMOS_SENSIVEIS = ["senha", "cvv", "codigo", "token", "cpf", "pix",
 VERBOS_PEDIDO = ["informe", "envie", "digite", "confirme", "passe", "forneca",
                  "transfira", "instale", "clique", "atualiz", "regulariz",
                  "desbloque", "entregue", "pague", "faca", "corte", "ligue"]
-# Um "token" (pedaço do texto entre espaços) é considerado link se casar com este padrão
+# Expressão regular para reconhecer links.
 PADRAO_LINK = re.compile(r"(https?://|www\.|bit\.ly|[a-z0-9-]+\.(?:com|net|org|app|link|top|xyz)\b)")
 
 def normalizar(texto: str) -> str:
@@ -107,11 +169,15 @@ def _contar_termos(texto_norm: str, termos: list) -> int:
 
 def extrair_atributos(texto: str) -> dict:
     """O QUE É: a ponte entre texto e machine learning.
-    O QUE FAZ: transforma uma mensagem em 6 números (os atributos X) que o
+    O QUE FAZ: transforma uma mensagem em 9 números (os atributos X) que o
     classificador consegue usar. É a "engenharia de atributos" do projeto."""
     norm = normalizar(texto)
     letras = [c for c in texto if c.isalpha()]
     maiusculas = sum(1 for c in letras if c.isupper())
+    aviso = bool(re.search(r"\b(?:nunca|nao)\s+(?:informe|envie|compartilhe|permita|transfira|responda)", norm))
+    pedido = bool(re.search(r"\b(?:ped(?:iu|e|iram)|solicit\w*|exig\w*|informe|envie|confirme|digite|manda|passe|leia)\b", norm))
+    credencial = bool(re.search(r"\b(?:senha|codigo|token|cvv|pin|credencia\w*|palavra secreta|cod)\b", norm))
+    acao_risco = bool(re.search(r"acesso remoto|compartilh\w* a tela|conta segura|entreg\w* o cartao|recolh\w* cart|taxa|tarifa antecipada|transferencia|deposito previo", norm))
     return {
         "n_links": sum(1 for tok in norm.split() if PADRAO_LINK.search(tok)),
         "n_urgencia": _contar_termos(norm, TERMOS_URGENCIA),
@@ -119,11 +185,14 @@ def extrair_atributos(texto: str) -> dict:
         "n_verbos_pedido": _contar_termos(norm, VERBOS_PEDIDO),
         "n_exclamacoes": texto.count("!"),
         "pct_maiusculas": round(100 * maiusculas / len(letras), 1) if letras else 0.0,
+        "pedido_credencial": int(pedido and credencial and not aviso),
+        "aviso_preventivo": int(aviso),
+        "pedido_acao_risco": int(acao_risco and not aviso),
     }
 
 
 def construir_dataset(mensagens: list = MENSAGENS_SIMULADAS) -> pd.DataFrame:
-    """O QUE FAZ: monta o DataFrame de treino: texto + 6 atributos + rótulo `perfil`.
+    """O QUE FAZ: monta o DataFrame de treino: texto + 9 atributos + rótulo `perfil`.
     Cada mensagem passa por `extrair_atributos`, garantindo que treino e uso real
     calculem os atributos exatamente do mesmo jeito."""
     linhas = []
@@ -186,6 +255,7 @@ LIMIAR = 0.2          # evidência mínima para considerar um fato "verdadeiro"
 NIVEL_ALTO = 0.7      # suspeita >= 0.7  -> nível ALTO
 NIVEL_MODERADO = 0.4  # suspeita >= 0.4  -> nível MODERADO
 MIN_INFO = 4          # mínimo de sinais respondidos para concluir "baixo risco"
+EVIDENCIA_MIN_REGRAS = 0.2   # suspeita mínima vinda SÓ das regras para o texto poder elevar o nível
 
 # De onde vem o CRITÉRIO de cada regra (justificativa da origem)
 FONTES = {
@@ -265,7 +335,7 @@ class BaseConhecimento:
         Procura: regras duplicadas, premissas inalcançáveis, ciclos de dependência,
         pesos inválidos e perguntas/fatos que nunca são usados."""
         rel = {"duplicadas": [], "inalcancaveis": [], "ciclos": [],
-               "cf_invalido": [], "nao_usados": []}
+               "cf_invalido": [], "nao_usados": [], "ids_duplicados": [], "premissas_contraditorias": []}
         derivados = {r.conclusao for r in self.regras}
         usados = {f for r in self.regras for f, _ in r.premissas}
 
@@ -273,7 +343,13 @@ class BaseConhecimento:
             for r2 in self.regras[i + 1:]:
                 if set(r1.premissas) == set(r2.premissas) and r1.conclusao == r2.conclusao:
                     rel["duplicadas"].append(f"{r1.id} e {r2.id} têm mesmas premissas e conclusão")
+        ids = set()
         for r in self.regras:
+            if r.id in ids:
+                rel["ids_duplicados"].append(r.id)
+            ids.add(r.id)
+            if any((f, not e) in r.premissas for f, e in r.premissas):
+                rel["premissas_contraditorias"].append(r.id)
             if not (0 < abs(r.cf) <= 1) or not (0 < r.limiar <= 1):
                 rel["cf_invalido"].append(f"{r.id}: cf={r.cf}, limiar={r.limiar}")
             for f, _ in r.premissas:
@@ -325,6 +401,7 @@ class MemoriaTrabalho:
         """Registra (ou atualiza) um fato com seu fator de certeza e sua origem."""
         self.fatos[fato] = cf
         self.origem[fato] = origem
+        self.desconhecidos.discard(fato)
 
     def limpar(self) -> None:
         """Esvazia a memória para começar uma nova consulta."""
@@ -344,93 +421,112 @@ class MotorInferencia:
         self.bc = bc
         self.mt = mt or MemoriaTrabalho()
         self.contribuicoes: dict = {}   # id da regra -> (fato, contribuição) [para explicar]
+        self.suportes = {}
+        self.suprimidas = {}
         self.perguntadas: list = []     # perguntas efetivamente feitas ao usuário
 
     def registrar_resposta(self, fato: str, resposta: Optional[str]) -> None:
-        """Converte a resposta do usuário em fato: sim -> +1, nao -> -1, outro -> desconhecido."""
-        if resposta == "sim":
-            self.mt.afirmar(fato, 1.0, "usuário")
-        elif resposta == "nao":
-            self.mt.afirmar(fato, -1.0, "usuário")
+        """Atualiza fatos; uma correção invalida todas as conclusões derivadas."""
+        if fato in self.mt.fatos or fato in self.mt.desconhecidos:
+            for f in list(self.mt.fatos):
+                if self.mt.origem[f] == "regras":
+                    del self.mt.fatos[f]
+                    del self.mt.origem[f]
+            self.contribuicoes.clear()
+            self.suportes.clear()
+            self.suprimidas.clear()
+        if resposta in ("sim", "nao"):
+            self.mt.afirmar(fato, 1.0 if resposta == "sim" else -1.0, "usuário")
         else:
+            self.mt.fatos.pop(fato, None)
+            self.mt.origem.pop(fato, None)
             self.mt.desconhecidos.add(fato)
 
-    def _contribuicao(self, r: Regra) -> Optional[float]:
-        """Calcula quanto uma regra contribui (cf × menor certeza das premissas).
-        Devolve None se alguma premissa não estiver satisfeita."""
-        forcas = []
-        for f, esperado in r.premissas:
-            cf = self.mt.fatos.get(f)
-            if cf is None or not premissa_ok(cf, esperado, r.limiar):
-                return None
-            forcas.append(abs(cf))
-        return r.cf * min(forcas)
+    def _selecionar(self, fato, candidatas):
+        """Evita dupla contagem: contribuições de mesmo sinal com suporte comum
+        não são somadas. Maior contribuição absoluta vence; empate: especificidade e ID.
+        É uma heurística conservadora, não uma demonstração de independência estatística."""
+        for rid in list(self.contribuicoes):
+            if self.contribuicoes[rid][0] == fato:
+                del self.contribuicoes[rid]
+        self.suprimidas[fato] = []
+        escolhidas = []
+        for r, c, suporte in sorted(candidatas, key=lambda x: (-abs(x[1]), -len(x[0].premissas), x[0].id)):
+            if any(c * d > 0 and suporte & outro for _, d, outro in escolhidas):
+                self.suprimidas[fato].append(r.id)
+                continue
+            escolhidas.append((r, c, suporte))
+        total = None
+        for r, c, _ in escolhidas:
+            self.contribuicoes[r.id] = (fato, c)
+            total = c if total is None else combinar(total, c)
+        self.suportes[fato] = set().union(*(sup for _, _, sup in escolhidas))
+        return total
 
     def encadeamento_frente(self) -> list:
-        """ENCADEAMENTO PARA FRENTE (dirigido por dados).
-        Parte dos fatos já presentes na memória e recalcula todas as conclusões possíveis
-        até estabilizar. Devolve a lista de regras que dispararam."""
-        derivados = {r.conclusao for r in self.bc.regras}
+        """Parte dos fatos disponíveis; aplica regras em ordem de dependência até estabilizar.
+        Não consulta o usuário. O limite e a detecção de ciclos impedem execução indefinida."""
+        for f in list(self.mt.fatos):
+            if self.mt.origem[f] == "regras":
+                del self.mt.fatos[f]
+                del self.mt.origem[f]
+        self.contribuicoes.clear()
+        self.suportes.clear()
+        self.suprimidas.clear()
+        derivados = sorted({r.conclusao for r in self.bc.regras})
         for _ in range(len(self.bc.regras) + 2):
-            self.contribuicoes.clear()
-            novos: dict = {}
+            anterior = dict(self.mt.fatos)
             for fato in derivados:
-                total = None
+                candidatas = []
                 for r in self.bc.regras_que_concluem(fato):
-                    c = self._contribuicao(r)
-                    if c is None:
+                    vals = [self.mt.fatos.get(f) for f, _ in r.premissas]
+                    if not vals or any(v is None or not premissa_ok(v, e, r.limiar)
+                                       for v, (_, e) in zip(vals, r.premissas)):
                         continue
-                    self.contribuicoes[r.id] = (fato, c)
-                    total = c if total is None else combinar(total, c)
+                    sup = set().union(*(self.suportes.get(f, {f}) for f, _ in r.premissas))
+                    candidatas.append((r, r.cf * min(map(abs, vals)), sup))
+                total = self._selecionar(fato, candidatas)
                 if total is not None:
-                    novos[fato] = total
-            mudou = False
-            for fato in derivados:
-                antigo = self.mt.fatos.get(fato)
-                if fato in novos:
-                    if antigo is None or abs(antigo - novos[fato]) > 1e-9:
-                        self.mt.afirmar(fato, novos[fato], "regras")
-                        mudou = True
-                elif antigo is not None and self.mt.origem.get(fato) == "regras":
+                    self.mt.afirmar(fato, total, "regras")
+                elif self.mt.origem.get(fato) == "regras":
                     del self.mt.fatos[fato]
                     del self.mt.origem[fato]
-                    mudou = True
-            if not mudou:
+            if anterior == self.mt.fatos:
                 break
         return list(self.contribuicoes)
 
     def avaliar(self, fato: str, provedor: Provedor,
                 _pilha: frozenset = frozenset()) -> Optional[float]:
-        """ENCADEAMENTO PARA TRÁS (dirigido por objetivos).
-        Descobre o fator de certeza de `fato`: se já está na memória, usa; se há regras
-        que o concluem, avalia as premissas (recursivamente) e combina as contribuições;
-        se é uma pergunta, consulta o usuário via `provedor`. Devolve None quando o dado
-        é desconhecido (caso INCOMPLETO). Se uma premissa falha, as demais premissas
-        daquela regra NÃO são perguntadas (curto-circuito: só pergunta o necessário)."""
-        if fato in self.mt.fatos:
-            return self.mt.fatos[fato]
-        if fato in self.mt.desconhecidos or fato in _pilha:
+        """Encadeamento para trás: investiga premissas do objetivo e pergunta fatos ausentes.
+        Recalcula conclusões derivadas em vez de reutilizar conclusões potencialmente antigas."""
+        if fato in _pilha or fato in self.mt.desconhecidos:
             return None
+        if fato in self.mt.fatos and self.mt.origem.get(fato) != "regras":
+            return self.mt.fatos[fato]
         regras = self.bc.regras_que_concluem(fato)
         if regras:
-            pilha = _pilha | {fato}
-            total = 0.0
+            candidatas = []
             for r in regras:
-                forcas, ok = [], True
+                vals = []
                 for f, esperado in r.premissas:
-                    cf = self.avaliar(f, provedor, pilha)
+                    cf = self.avaliar(f, provedor, _pilha | {fato})
                     if cf is None or not premissa_ok(cf, esperado, r.limiar):
-                        ok = False
                         break
-                    forcas.append(abs(cf))
-                if ok:
-                    c = r.cf * min(forcas)
-                    self.contribuicoes[r.id] = (fato, c)
-                    total = combinar(total, c)
-            self.mt.afirmar(fato, total, "regras")
+                    vals.append(abs(cf))
+                else:
+                    if vals:
+                        sup = set().union(*(self.suportes.get(f, {f}) for f, _ in r.premissas))
+                        candidatas.append((r, r.cf * min(vals), sup))
+            total = self._selecionar(fato, candidatas)
+            if total is not None:
+                self.mt.afirmar(fato, total, "regras")
+            elif self.mt.origem.get(fato) == "regras":
+                del self.mt.fatos[fato]
+                del self.mt.origem[fato]
             return total
         if fato in self.bc.perguntas:
-            self.perguntadas.append(fato)
+            if fato not in self.perguntadas:
+                self.perguntadas.append(fato)
             self.registrar_resposta(fato, provedor(fato, self.bc.perguntas[fato]))
             return self.mt.fatos.get(fato)
         return None
@@ -446,27 +542,35 @@ class MotorInferencia:
                if self.mt.origem[f] == "usuário" and cf > 0]
         linhas += [f"  - {s}" for s in sim] or ["  - (nenhum sinal de alerta confirmado)"]
         if "ml_golpe" in self.mt.fatos:
-            p = (self.mt.fatos["ml_golpe"] + 1) / 2
-            linhas.append(f"Leitura do texto pelo modelo de ML: {p:.0%} de chance de ser golpe.")
+            linhas.append(f"Fato dinâmico do modelo de ML: ml_golpe (valor lógico {self.mt.fatos['ml_golpe']:+.2f}); não é probabilidade real.")
 
-        evid, susp, tipo = [], [], []
+        evid, susp, tipo, protecao = [], [], [], []
         for rid, (fato, c) in self.contribuicoes.items():
             r = regras[rid]
             if fato.startswith("i_") and fato != "i_houve_dano":
-                evid.append(f"  - {rid}: {rot.get(fato, fato)} ({c:.0%}). {r.nota} [fonte: {r.fonte}]")
+                evid.append(f"  - {rid}: {rot.get(fato, fato)} (CF {c:.2f}). {r.nota} [fonte: {r.fonte}]")
             elif fato == "suspeita_golpe":
                 sinal = "aumenta" if c > 0 else "reduz"
-                susp.append(f"  - {rid} ({sinal} a suspeita em {abs(c):.0%}): {r.nota} [fonte: {r.fonte}]")
+                susp.append(f"  - {rid} ({sinal} a suspeita com contribuição CF {abs(c):.2f}): {r.nota} [fonte: {r.fonte}]")
+            elif fato == "i_houve_dano" or fato in self.bc.acoes:
+                protecao.append(f"  - {rid}: {self.bc.acoes.get(fato, 'possível exposição relatada')} (CF {c:.2f}). [fonte: {r.fonte}]")
             elif fato in self.bc.tipos:
-                tipo.append(f"  - {rid}: indica '{self.bc.tipos[fato]}' ({c:.0%}). {r.nota} [fonte: {r.fonte}]")
+                tipo.append(f"  - {rid}: indica '{self.bc.tipos[fato]}' (CF {c:.2f}). {r.nota} [fonte: {r.fonte}]")
         for titulo, itens in (("Evidências deduzidas:", evid),
                               ("Regras que pesaram na suspeita:", susp),
-                              ("Regras que indicam o tipo de golpe:", tipo)):
+                              ("Regras que indicam o tipo de golpe:", tipo),
+                              ("Regras de proteção avaliadas:", protecao)):
             if itens:
                 linhas.append(titulo)
                 linhas += itens
         if not (evid or susp or tipo):
             linhas.append("Nenhuma regra de alerta foi acionada.")
+        nao = [rot.get(f, f) for f, cf in self.mt.fatos.items() if self.mt.origem[f] == "usuário" and cf < 0]
+        linhas.append("Fatos negados: " + ("; ".join(nao) or "nenhum"))
+        linhas.append("Informações ausentes: " + ("; ".join(rot.get(f, f) for f in sorted(self.mt.desconhecidos)) or "nenhuma"))
+        suprimidas = sorted({rid for ids in self.suprimidas.values() for rid in ids})
+        if suprimidas:
+            linhas.append("Regras não acumuladas por suporte comum: " + ", ".join(suprimidas))
         return "\n".join(linhas)
 
 def criar_bc_golpes() -> BaseConhecimento:
@@ -487,13 +591,13 @@ def criar_bc_golpes() -> BaseConhecimento:
         "s_promessa_beneficio": "Ofereceram prêmio, aumento de limite, cashback ou desconto?",
         "s_pede_pagar_taxa": "Pediram pagamento de taxa, boleto ou tarifa para liberar algo?",
         "s_voce_iniciou": "Foi VOCÊ quem iniciou o contato, ligando para o número oficial (cartão, app ou site)?",
-        # ---- o que a pessoa já fez (só perguntado se houver suspeita) ----
-        "a_passou_codigo": "Você chegou a informar algum código?",
-        "a_passou_senha": "Você chegou a informar senha ou CVV?",
+        # ---- o que a pessoa já fez (investigado em todas as consultas) ----
+        "a_passou_codigo": "Você chegou a informar algum código ao contato suspeito? Não digite o código aqui.",
+        "a_passou_senha": "Você chegou a informar senha ou CVV ao contato suspeito? Não digite os dados aqui.",
         "a_instalou_app": "Você instalou o aplicativo ou liberou o acesso remoto?",
-        "a_fez_transferencia": "Você chegou a fazer Pix, transferência ou pagamento?",
+        "a_fez_transferencia": "Você chegou a fazer um Pix, transferência ou pagamento solicitado nesse contato suspeito?",
         "a_entregou_cartao": "Você entregou o cartão (ou deixou alguém buscá-lo)?",
-        "a_clicou_link": "Você clicou no link ou preencheu dados nele?",
+        "a_clicou_link": "Você inseriu dados sensíveis em um link suspeito? (Apenas clicar não confirma exposição de credenciais.)",
     }
     rotulos = {
         "s_contato_inesperado": "contato que você não solicitou",
@@ -514,7 +618,7 @@ def criar_bc_golpes() -> BaseConhecimento:
         "a_instalou_app": "você instalou o app de acesso remoto",
         "a_fez_transferencia": "você fez Pix/transferência",
         "a_entregou_cartao": "você entregou o cartão",
-        "a_clicou_link": "você clicou no link",
+        "a_clicou_link": "você inseriu dados sensíveis em link suspeito",
         "i_pressao": "pressão psicológica",
         "i_pede_credencial": "pedido de credencial",
         "i_canal_nao_oficial": "canal não oficial",
@@ -531,11 +635,11 @@ def criar_bc_golpes() -> BaseConhecimento:
         "t_falsa_oferta": "Falsa oferta ou prêmio (cobrança de taxa)",
     }
     acoes = {   # a ordem define a prioridade na tela
-        "ac_contestar_pix": "URGENTE: ligue agora para o banco pelo canal oficial (verso do cartão ou app) e peça a contestação do Pix pelo MED (Mecanismo Especial de Devolução). O pedido tem prazo (confirme o atual no site do Banco Central) e, quanto antes for feito, maiores as chances de bloquear o valor, pois isso depende de ainda haver saldo na conta de quem recebeu.",
+        "ac_contestar_pix": "URGENTE: ligue agora para o banco pelo canal oficial (verso do cartão ou app) e peça orientação para contestar a operação. Se foi Pix e houver suspeita de fraude, solicite avaliação pelo MED (Mecanismo Especial de Devolução). O pedido tem prazo (confirme o atual no site do Banco Central) e, quanto antes for feito, maiores as chances de bloquear o valor, pois isso depende de ainda haver saldo na conta de quem recebeu.",
         "ac_bloquear_cartao": "URGENTE: bloqueie o cartão pelo app ou pela central oficial e solicite um novo. Não entregue o cartão a ninguém que apareça para 'buscar'.",
-        "ac_remover_app": "URGENTE: desinstale o aplicativo de acesso remoto, desligue a internet do aparelho e confirme com o banco, pelo canal oficial, se houve movimentação. Se possível, restaure o aparelho de fábrica.",
+        "ac_remover_app": "URGENTE: desligue a internet do aparelho, use outro dispositivo confiável para contatar o banco e peça orientação para desinstalar o aplicativo de acesso remoto. Preserve evidências.",
         "ac_trocar_senha": "Troque agora as senhas do banco e do e-mail, encerre sessões/dispositivos conectados e, se informou a senha do cartão, peça a troca ou o bloqueio.",
-        "ac_ligar_banco": "Avise o banco, pelo canal oficial, que você foi alvo de golpe, para que ele reforce a proteção da sua conta.",
+        "ac_ligar_banco": "Avise o banco, pelo canal oficial, sobre a possível exposição para que ele oriente a proteção da conta.",
         "ac_bo": "Registre boletim de ocorrência (delegacia virtual do seu estado) e guarde prints, números de telefone, horários e comprovantes.",
         "ac_monitorar": "Ative alertas de transações e acompanhe o extrato nos próximos dias; desconfie de novos contatos sobre o mesmo assunto.",
         "ac_encerrar": "Encerre o contato agora (desligue ou pare de responder) e não siga nenhuma instrução recebida.",
@@ -551,15 +655,15 @@ def criar_bc_golpes() -> BaseConhecimento:
         R("I2", "s_urgencia", "i_pressao", 0.6,
           "urgência e ameaça de bloqueio são usadas para impedir que você confirme a história.", fonte=HEUR),
         R("I3", "s_pede_codigo", "i_pede_credencial", 0.9,
-          "banco e operadora nunca pedem o código recebido por SMS, token ou aplicativo.", fonte=FEB),
+          "contatos inesperados que pedem códigos são suspeitos; não compartilhe códigos com terceiros.", fonte=FEB),
         R("I4", "s_pede_senha", "i_pede_credencial", 0.95,
-          "nenhuma instituição legítima pede senha completa, CVV ou senha do cartão.", fonte=FEB),
+          "não forneça senha completa, CVV ou senha do cartão a um atendente por mensagem ou ligação.", fonte=FEB),
         R("I5", "s_numero_nao_oficial", "i_canal_nao_oficial", 0.7,
           "o contato não veio de um canal que você possa confirmar como oficial (o número pode ser falsificado).", fonte=FEB),
         R("I6", "s_link", "i_canal_nao_oficial", 0.6,
           "links de 'regularização' ou 'atualização de cadastro' enviados por mensagem são a principal porta do phishing.", fonte=FEB),
         R("I7", "s_pede_transferencia", "i_pede_acao_financeira", 0.95,
-          "não existe 'conta segura': nenhum banco manda você transferir dinheiro para protegê-lo.", fonte=FEB),
+          "pedir transferência a uma suposta conta segura para proteger dinheiro é sinal de fraude.", fonte=FEB),
         R("I8", "s_pede_pagar_taxa", "i_pede_acao_financeira", 0.7,
           "cobrar taxa para liberar benefício ou desbloquear conta é típico de golpe.", fonte=HEUR),
         R("I9", "s_pede_app_remoto", "i_pede_acesso_remoto", 0.95,
@@ -580,7 +684,7 @@ def criar_bc_golpes() -> BaseConhecimento:
         R("S7", "s_cita_compra_suspeita & s_contato_inesperado", "suspeita_golpe", 0.4,
           "bancos reais também avisam sobre fraude, por isso o peso é só moderado sem outros sinais.", fonte=HEUR),
         R("S8", "s_pede_entregar_cartao", "suspeita_golpe", 0.95,
-          "bancos não enviam motoboy para buscar cartão: isso é golpe.", fonte=FEB),
+          "a retirada do cartão por suposto funcionário é sinal grave de possível golpe do motoboy.", fonte=FEB),
         R("S9", "s_promessa_beneficio & s_link", "suspeita_golpe", 0.7,
           "prêmio ou benefício acompanhado de link é padrão de phishing.", fonte=HEUR),
         R("S10", "s_promessa_beneficio & s_contato_inesperado", "suspeita_golpe", 0.45,
@@ -590,10 +694,9 @@ def criar_bc_golpes() -> BaseConhecimento:
         R("S12", "s_voce_iniciou & !s_numero_nao_oficial", "suspeita_golpe", -0.4,
           "você ligou para o número oficial, o que reduz o risco (mas golpistas podem manter a linha aberta; nunca informe código ou senha).", fonte=FEB),
         # --- Fase 1 (modelo de ML) -> suspeita ---
+        # A previsão de golpe reforça a suspeita; a previsão negativa não a reduz.
         R("M1", "ml_golpe", "suspeita_golpe", 0.5,
-          "o modelo de ML, treinado com mensagens simuladas, achou o texto parecido com golpes (peso moderado: é só um apoio).", fonte=ML),
-        R("M2", "!ml_golpe", "suspeita_golpe", -0.2,
-          "o modelo achou o texto parecido com mensagens legítimas (peso baixo: ligações de golpe não têm texto).", fonte=ML),
+          "o modelo de ML, treinado com mensagens simuladas, achou o texto parecido com golpes (só reforça: sem sinal confirmado nas respostas, vira apenas um 'alerta fraco').", fonte=ML),
         # --- tipo de golpe ---
         R("T1", "s_cita_compra_suspeita & i_pede_acao_financeira", "t_conta_segura", 0.9,
           "compra suspeita + pedido de transferência é o golpe da conta segura.", fonte=FEB),
@@ -620,20 +723,20 @@ def criar_bc_golpes() -> BaseConhecimento:
         # --- nível de alerta (usado pelo plano de ação) ---
         R("N1", "suspeita_golpe", "f_alerta", 1.0, "suspeita moderada ou alta.",
           limiar=NIVEL_MODERADO, fonte=HEUR),
-        # --- danos já ocorridos (só perguntados se houver alerta) ---
-        R("D1", "f_alerta & a_passou_codigo", "i_houve_dano", 1.0),
-        R("D2", "f_alerta & a_passou_senha", "i_houve_dano", 1.0),
-        R("D3", "f_alerta & a_instalou_app", "i_houve_dano", 1.0),
-        R("D4", "f_alerta & a_fez_transferencia", "i_houve_dano", 1.0),
-        R("D5", "f_alerta & a_entregou_cartao", "i_houve_dano", 1.0),
-        R("D6", "f_alerta & a_clicou_link", "i_houve_dano", 1.0),
+        # --- danos já ocorridos (independentes do nível de suspeita) ---
+        R("D1", "a_passou_codigo", "i_houve_dano", 1.0),
+        R("D2", "a_passou_senha", "i_houve_dano", 1.0),
+        R("D3", "a_instalou_app", "i_houve_dano", 1.0),
+        R("D4", "a_fez_transferencia", "i_houve_dano", 1.0),
+        R("D5", "a_entregou_cartao", "i_houve_dano", 1.0),
+        R("D6", "a_clicou_link", "i_houve_dano", 1.0),
         # --- plano de ação ---
-        R("A1", "f_alerta & a_fez_transferencia", "ac_contestar_pix", 1.0, fonte=BCB),
-        R("A2", "f_alerta & a_entregou_cartao", "ac_bloquear_cartao", 1.0, fonte=FEB),
-        R("A3", "f_alerta & a_instalou_app", "ac_remover_app", 1.0, fonte=FEB),
-        R("A4", "f_alerta & a_passou_senha", "ac_trocar_senha", 1.0, fonte=FEB),
-        R("A5", "f_alerta & a_passou_codigo", "ac_trocar_senha", 1.0, fonte=FEB),
-        R("A6", "f_alerta & a_clicou_link", "ac_trocar_senha", 0.9, fonte=HEUR),
+        R("A1", "a_fez_transferencia", "ac_contestar_pix", 1.0, fonte=BCB),
+        R("A2", "a_entregou_cartao", "ac_bloquear_cartao", 1.0, fonte=FEB),
+        R("A3", "a_instalou_app", "ac_remover_app", 1.0, fonte=FEB),
+        R("A4", "a_passou_senha", "ac_trocar_senha", 1.0, fonte=FEB),
+        R("A5", "a_passou_codigo", "ac_trocar_senha", 1.0, fonte=FEB),
+        R("A6", "a_clicou_link", "ac_trocar_senha", 0.9, fonte=HEUR),
         R("A7", "i_houve_dano", "ac_ligar_banco", 1.0, fonte=FEB),
         R("A8", "i_houve_dano", "ac_bo", 1.0, fonte=HEUR),
         R("A9", "i_houve_dano", "ac_monitorar", 1.0, fonte=HEUR),
@@ -657,14 +760,14 @@ def obter_resultado_padrao() -> ResultadoTreino:
 
 
 def prob_para_cf(p_golpe: float) -> float:
-    """O QUE FAZ: converte probabilidade (0 a 1) em fator de certeza (-1 a +1).
-    50% -> 0 (modelo não sabe); 100% -> +1; 0% -> -1."""
+    """O QUE FAZ: converte escore não calibrado (0 a 1) em fator de certeza heurístico (-1 a +1).
+    Função legada, mantida por compatibilidade; a versão 2 usa o rótulo previsto como fato lógico."""
     return max(-1.0, min(1.0, (p_golpe - 0.5) * 2))
 
 
 def classificar_mensagem(texto: str, resultado: Optional[ResultadoTreino] = None) -> dict:
     """FASE 1 (machine learning). O QUE FAZ: classifica o texto de uma mensagem.
-    Devolve: classe prevista, probabilidade de golpe, atributos calculados e um
+    Devolve: classe prevista, escore não calibrado da folha para golpe, atributos calculados e um
     indicador `fora_do_intervalo` (True se algum atributo está fora do que o modelo viu
     no treino, caso em que a previsão é menos confiável)."""
     resultado = resultado or obter_resultado_padrao()
@@ -674,14 +777,14 @@ def classificar_mensagem(texto: str, resultado: Optional[ResultadoTreino] = None
     p_golpe = float(probas.get("golpe", 0.0))
     fora = any(not (resultado.X_treino[c].min() <= atrib[c] <= resultado.X_treino[c].max())
                for c in ATRIBUTOS)
-    return {"classe": "golpe" if p_golpe >= 0.5 else "legitimo",
+    return {"classe": str(resultado.modelo.predict(x)[0]),
             "prob_golpe": p_golpe, "atributos": atrib, "fora_do_intervalo": fora}
 
 
 @dataclass
 class Diagnostico:
     """O QUE É: o resultado final entregue ao usuário.
-    suspeita (0 a 1), nivel (ALTO/MODERADO/BAIXO/INCOMPLETO), tipos [(nome, certeza)],
+    suspeita (0 a 1), nivel (ALTO/MODERADO/ALERTA FRACO/BAIXO/INCOMPLETO), tipos [(nome, certeza)],
     acoes (em ordem de prioridade), explicacao (texto), perguntas_feitas, ml (saída da
     Fase 1, se houve texto) e aviso (sempre presente: revisão humana)."""
     suspeita: float
@@ -692,6 +795,8 @@ class Diagnostico:
     perguntas_feitas: int
     ml: Optional[dict] = None
     aviso: str = ""
+    comprometimento: str = "NÃO INFORMADO"
+    nivel_suspeita: str = "INCOMPLETO"
 
 
 ORIENTACAO_BAIXO = ("Não há indícios fortes de golpe nas suas respostas. Mesmo assim: "
@@ -700,6 +805,11 @@ ORIENTACAO_BAIXO = ("Não há indícios fortes de golpe nas suas respostas. Mesm
 ORIENTACAO_INCOMPLETO = ("Informações insuficientes para concluir. Responda mais perguntas "
                          "ou, na dúvida, confirme pelo canal oficial e não compartilhe "
                          "códigos nem senhas.")
+ORIENTACAO_ALERTA_FRACO = ("Alerta fraco: o texto da mensagem lembra golpes, mas nenhum sinal "
+                           "confirmado por você reforça essa suspeita. Pode ser um alarme falso "
+                           "(cobranças e avisos legítimos às vezes parecem golpe). Revise suas "
+                           "respostas e, na dúvida, confirme pelo canal oficial; não informe "
+                           "códigos nem senhas.")
 
 
 def classificar_nivel(cf: float, sinais_conhecidos: int) -> str:
@@ -713,35 +823,72 @@ def classificar_nivel(cf: float, sinais_conhecidos: int) -> str:
     return "INCOMPLETO" if sinais_conhecidos < MIN_INFO else "BAIXO"
 
 
+def suspeita_so_regras(motor: MotorInferencia) -> float:
+    """O QUE FAZ: recalcula a suspeita IGNORANDO as regras que vêm do modelo de ML
+    (fonte "ML"). Serve para saber se a suspeita existe por causa das respostas do
+    usuário ou apenas por causa da leitura do texto pelo modelo (medida ética: o texto
+    sozinho nunca dispara o plano de ação)."""
+    regras = {r.id: r for r in motor.bc.regras}
+    total = 0.0
+    for rid, (fato, c) in motor.contribuicoes.items():
+        if fato == "suspeita_golpe" and regras[rid].fonte != "ML":
+            total = combinar(total, c)
+    return total
+
+
 def diagnosticar(bc: BaseConhecimento, provedor: Provedor,
                  motor: Optional[MotorInferencia] = None) -> tuple:
     """FASE 2 (sistema especialista). O QUE FAZ: objetivo 1) suspeita de golpe;
     objetivo 2) tipo de golpe; objetivo 3) plano de ação. Cada objetivo é resolvido por
     encadeamento para trás, perguntando ao usuário (`provedor`) apenas o necessário.
-    Perguntas sobre danos (a_*) só aparecem quando há alerta."""
+    Perguntas sobre danos (a_*) são investigadas independentemente da suspeita. PROTEÇÃO: se a suspeita
+    existe só por causa do modelo de ML (as regras dão menos de 20%), o nível é
+    "ALERTA FRACO" e o plano de ação (encerrar contato etc.) NÃO é acionado."""
     motor = motor or MotorInferencia(bc)
+    # Prioriza a investigação de exposição; todas as seis perguntas são examinadas.
+    for f in bc.perguntas:
+        if f.startswith("a_"):
+            motor.avaliar(f, provedor)
+    dano = (motor.avaliar("i_houve_dano", provedor) or 0.0) >= LIMIAR
     suspeita = motor.avaliar("suspeita_golpe", provedor) or 0.0
     conhecidos = sum(1 for f in motor.mt.fatos
                      if f.startswith("s_") and motor.mt.origem[f] == "usuário")
     nivel = classificar_nivel(suspeita, conhecidos)
+    # Sem evidências confirmadas, a previsão positiva gera apenas alerta fraco.
+    if nivel in ("ALTO", "MODERADO") and suspeita_so_regras(motor) < EVIDENCIA_MIN_REGRAS:
+        nivel = "ALERTA FRACO"
 
+    nivel_suspeita = nivel
     tipos, acoes = [], []
-    if nivel in ("ALTO", "MODERADO"):
+    if dano:
+        nivel = "CRÍTICO"  # urgência de proteção, não certeza de fraude
+    if nivel in ("ALTO", "MODERADO", "CRÍTICO"):
         for t, nome in bc.tipos.items():
             cf = motor.avaliar(t, provedor) or 0.0
             if cf >= NIVEL_MODERADO:
                 tipos.append((nome, cf))
         tipos.sort(key=lambda x: -x[1])
         for a, texto in bc.acoes.items():
+            if nivel == "CRÍTICO" and a in ("ac_encerrar", "ac_bloquear_denunciar") and suspeita_so_regras(motor) < EVIDENCIA_MIN_REGRAS:
+                continue
             if (motor.avaliar(a, provedor) or 0.0) >= LIMIAR:
                 acoes.append(texto)
+    elif nivel == "ALERTA FRACO":
+        acoes.append(ORIENTACAO_ALERTA_FRACO)
     elif nivel == "BAIXO":
         acoes.append(ORIENTACAO_BAIXO)
     else:
         acoes.append(ORIENTACAO_INCOMPLETO)
 
+    explicacao = motor.explicar()
+    if nivel == "ALERTA FRACO":
+        explicacao += ("\nObservação: a suspeita vem apenas da leitura do texto pelo modelo de ML; "
+                       "nenhuma resposta sua a confirma. Por isso o plano de ação não foi acionado.")
     return Diagnostico(max(suspeita, 0.0), nivel, tipos, acoes,
-                       motor.explicar(), len(motor.perguntadas)), motor
+                       explicacao, len(motor.perguntadas), comprometimento=(
+                           "POSSÍVEL EXPOSIÇÃO" if dano else "NENHUMA EXPOSIÇÃO RELATADA"
+                           if all(f in motor.mt.fatos for f in bc.perguntas if f.startswith("a_"))
+                           else "NÃO INFORMADO OU PARCIAL"), nivel_suspeita=nivel_suspeita), motor
 
 
 def analisar_contato(bc: BaseConhecimento, provedor: Provedor, texto: Optional[str] = None,
@@ -753,7 +900,7 @@ def analisar_contato(bc: BaseConhecimento, provedor: Provedor, texto: Optional[s
     ml = None
     if texto and texto.strip():
         ml = classificar_mensagem(texto, resultado)
-        motor.mt.afirmar("ml_golpe", prob_para_cf(ml["prob_golpe"]), "modelo de ML")
+        motor.mt.afirmar("ml_golpe", 1.0 if ml["classe"] == "golpe" else -1.0, "modelo de ML")
     diag, motor = diagnosticar(bc, provedor, motor)
     diag.ml = ml
     diag.aviso = ("Entrada fora dos intervalos observados no treino: a leitura do modelo "
@@ -778,19 +925,20 @@ def provedor_cli(fato: str, pergunta: str) -> Optional[str]:
 def mostrar(d: Diagnostico) -> None:
     """Imprime o resultado: grau de suspeita, leitura do ML, tipo, plano de ação, explicação e aviso."""
     print("\n" + "=" * 62)
-    print(f"GRAU DE SUSPEITA: {d.nivel}" +
-          (f" ({d.suspeita:.0%})" if d.nivel != "INCOMPLETO" else ""))
+    print(f"NÍVEL DE ORIENTAÇÃO: {d.nivel} | CF de suspeita: {d.suspeita:.2f}")
+    print(f"Suspeita: {d.nivel_suspeita} | Comprometimento: {d.comprometimento}")
     if d.ml:
-        print(f"Modelo de ML (texto): {d.ml['classe']} ({d.ml['prob_golpe']:.0%} de chance de golpe)")
+        print(f"Modelo de ML (texto): {d.ml['classe']} (escore da folha para golpe: {d.ml['prob_golpe']:.2f}; não calibrado)")
     if d.tipos:
         print("\nTipo provável:")
         for nome, cf in d.tipos:
-            print(f"  - {nome} ({cf:.0%})")
+            print(f"  - {nome} (CF {cf:.2f})")
     print("\nO que fazer:")
     for i, a in enumerate(d.acoes, 1):
         print(f"  {i}. {a}")
     print("\n" + d.explicacao)
     print(f"\nAviso: {d.aviso}")
+    print("Nota: fatores de certeza e escores da árvore não são probabilidades medidas.")
     print("=" * 62)
 
 
@@ -801,7 +949,9 @@ def main() -> None:
     if problemas:
         print("Aviso: falhas na base de conhecimento:", problemas)
     print("=== Triagem de golpes: falsa central de atendimento ===")
-    print("Ferramenta educacional de apoio. Não substitui o banco ou a operadora.\n")
+    print("Ferramenta educacional de apoio. Não substitui o banco ou a operadora.")
+    print("Privacidade: NÃO cole CPF, senhas, códigos ou números de cartão reais (troque por XXX).")
+    print("O programa não grava nada em arquivo; no Colab, limpe as saídas antes de salvar o notebook.\n")
     while True:
         texto = input("Cole o texto da mensagem recebida (Enter para pular): ")
         d, _ = analisar_contato(bc, provedor_cli, texto)
